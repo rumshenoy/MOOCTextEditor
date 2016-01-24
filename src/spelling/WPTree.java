@@ -7,6 +7,7 @@ package spelling;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * WPTree implements WordPath by dynamically creating a tree of words during a Breadth First
@@ -20,16 +21,15 @@ public class WPTree implements WordPath {
 	// this is the root node of the WPTree
 	private WPTreeNode root;
 	// used to search for nearby Words
-	private NearbyWords nw; 
+	private NearbyWords nw;
 	
 	// This constructor is used by the Text Editor Application
 	// You'll need to create your own NearbyWords object here.
 	public WPTree () {
 		this.root = null;
-		// TODO initialize a NearbyWords object
-		// Dictionary d = new DictionaryHashSet();
-		// DictionaryLoader.loadDictionary(d, "data/dict.txt");
-		// this.nw = new NearbyWords(d);
+		 Dictionary d = new DictionaryHashSet();
+		 DictionaryLoader.loadDictionary(d, "data/dict.txt");
+		 this.nw = new NearbyWords(d);
 	}
 	
 	//This constructor will be used by the grader code
@@ -41,8 +41,33 @@ public class WPTree implements WordPath {
 	// see method description in WordPath interface
 	public List<String> findPath(String word1, String word2) 
 	{
-	    // TODO: Implement this method.
-	    return new LinkedList<String>();
+
+        LinkedList<String> path = new LinkedList<>();
+        Queue<WPTreeNode> queue = new LinkedList<>();
+        HashSet<String> visited = new HashSet<String>();
+        if(!this.nw.dict.isWord(word1) || !this.nw.dict.isWord(word2)){
+            return path;
+        }
+
+        this.root = new WPTreeNode(word1, null);
+        visited.add(word1);
+        queue.add(root);
+        WPTreeNode curr = root;
+        while(!queue.isEmpty()){
+            curr = queue.poll();
+            List<String> neighbours = this.nw.distanceOne(curr.getWord(), true);
+            for(String n: neighbours){
+                if(!visited.contains(n)){
+                    WPTreeNode child = curr.addChild(n);
+                    visited.add(n);
+                    queue.add(child);
+                    if(n.equals(word2)){
+                        return child.buildPathToRoot();
+                    }
+                }
+            }
+        }
+        return path;
 	}
 	
 	// Method to print a list of WPTreeNodes (useful for debugging)
