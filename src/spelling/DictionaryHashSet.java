@@ -3,15 +3,13 @@
  */
 package spelling;
 
-import java.io.File;
 import java.util.HashSet;
-import java.util.Scanner;
 
 
 /**
  * A class that implements the Dictionary interface with a HashSet
  */
-public class DictionaryHashSet implements Dictionary 
+public class DictionaryHashSet implements Dictionary
 {
 
     private HashSet<String> words;

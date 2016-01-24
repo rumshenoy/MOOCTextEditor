@@ -1,17 +1,13 @@
 package spelling;
 
-import java.util.List;
-import java.util.Set;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.*;
 
 /** 
  * An trie data structure that implements the Dictionary and the AutoComplete ADT
  * @author You
  *
  */
-public class AutoCompleteDictionaryTrie implements  Dictionary, AutoComplete {
+public class AutoCompleteDictionaryTrie implements Dictionary, AutoComplete {
 
     private TrieNode root;
     private int size;
@@ -20,6 +16,7 @@ public class AutoCompleteDictionaryTrie implements  Dictionary, AutoComplete {
     public AutoCompleteDictionaryTrie()
 	{
 		root = new TrieNode();
+		size = 0;
 	}
 	
 	
@@ -28,8 +25,38 @@ public class AutoCompleteDictionaryTrie implements  Dictionary, AutoComplete {
 	 * That is, you should convert the string to all lower case as you insert it. */
 	public boolean addWord(String word)
 	{
-	    //TODO: Implement this method.
-	    return false;
+
+		String lowerCaseWord = word.toLowerCase();
+		TrieNode curr = root;
+		TrieNode child = curr;
+		int i = 0;
+
+		while(i < lowerCaseWord.length()){
+			char currentChar = lowerCaseWord.charAt(i);
+			Set<Character> validNextCharacters = curr.getValidNextCharacters();
+			if(validNextCharacters != null &&
+					validNextCharacters.size() > 0 && validNextCharacters.contains(currentChar)){
+				child = curr.getChild(currentChar);
+				if(child.getText().equals(lowerCaseWord)) {
+					if (child.endsWord()) {
+						return false;
+					} else {
+						child.setEndsWord(true);
+						size++;
+						return true;
+					}
+				}
+			}else{
+				child = curr.insert(currentChar);
+			}
+			curr = child;
+
+			i++;
+		}
+
+		curr.setEndsWord(true);
+		size++;
+		return true;
 	}
 	
 	/** 
@@ -38,8 +65,7 @@ public class AutoCompleteDictionaryTrie implements  Dictionary, AutoComplete {
 	 */
 	public int size()
 	{
-	    //TODO: Implement this method
-	    return 0;
+	    return size;
 	}
 	
 	
@@ -47,11 +73,32 @@ public class AutoCompleteDictionaryTrie implements  Dictionary, AutoComplete {
 	@Override
 	public boolean isWord(String s) 
 	{
-	    // TODO: Implement this method
+		String lowerCaseWord = s.toLowerCase();
+		TrieNode curr = root;
+		TrieNode child = curr;
+		int i = 0;
+
+		while(i < lowerCaseWord.length()){
+			char currentChar = lowerCaseWord.charAt(i);
+			Set<Character> validNextCharacters = curr.getValidNextCharacters();
+			if(validNextCharacters != null &&
+					validNextCharacters.size() > 0 && validNextCharacters.contains(currentChar)){
+					child = curr.getChild(currentChar);
+			}else{
+				child = curr.insert(currentChar);
+			}
+			curr = child;
+
+			i++;
+		}
+
+		if(child.getText().equals(lowerCaseWord) && child.endsWord()){
+			return true;
+		}
 		return false;
 	}
 
-	/** 
+	/**
 	 *  * Returns up to the n "best" predictions, including the word itself,
      * in terms of length
      * If this string is not in the trie, it returns null.
@@ -59,9 +106,8 @@ public class AutoCompleteDictionaryTrie implements  Dictionary, AutoComplete {
      * @param n The maximum number of predictions desired.
      * @return A list containing the up to n best predictions
      */@Override
-     public List<String> predictCompletions(String prefix, int numCompletions) 
+     public List<String> predictCompletions(String prefix, int numCompletions)
      {
-    	 // TODO: Implement this method
     	 // This method should implement the following algorithm:
     	 // 1. Find the stem in the trie.  If the stem does not appear in the trie, return an
     	 //    empty list
@@ -75,8 +121,42 @@ public class AutoCompleteDictionaryTrie implements  Dictionary, AutoComplete {
     	 //       If it is a word, add it to the completions list
     	 //       Add all of its child nodes to the back of the queue
     	 // Return the list of completions
+
+		 List<String> predictions = new ArrayList<>();
+
+		 TrieNode curr = root;
+		 int i = 0;
+		 while(i < prefix.length()){
+			 Set<Character> validNextCharacters = curr.getValidNextCharacters();
+			 Character currCharacter = prefix.charAt(i);
+
+			 if(validNextCharacters.contains(currCharacter)){
+				 curr = curr.getChild(currCharacter);
+			 }else{
+				return predictions;
+			 }
+			 i++;
+		 }
+
+		 //we have traversed the whole stem
+		 Queue<TrieNode> queue = new LinkedList<>();
+		 queue.add(curr);
+		 while (!queue.isEmpty()){
+			 TrieNode currNode = queue.poll();
+			 if(predictions.size() < numCompletions){
+				 if(currNode.endsWord()){
+					 predictions.add(currNode.getText());
+				 }
+			 }else{
+				 return predictions;
+			 }
+
+			 for(Character c: currNode.getValidNextCharacters()){
+				 queue.add(currNode.getChild(c));
+			 }
+		 }
     	 
-         return null;
+         return predictions;
      }
 
  	// For debugging
@@ -99,7 +179,4 @@ public class AutoCompleteDictionaryTrie implements  Dictionary, AutoComplete {
  			printNode(next);
  		}
  	}
- 	
-
-	
 }
