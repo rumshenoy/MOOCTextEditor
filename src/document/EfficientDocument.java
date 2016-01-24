@@ -42,9 +42,19 @@ public class EfficientDocument extends Document {
 		// Provide this first line in the starter code.  
 		// Words are only strings of letters.  No numbers.
 		List<String> tokens = getTokens("[!?.]+|[a-zA-Z]+");
-		
-		// TODO: Finish this method.  Remember the countSyllables method from 
-		// Document.  That will come in handy here.
+
+		List<String> sentences = getTokens("[^?.!]+");
+		this.numSentences = sentences.size();
+
+		List<String> words = getTokens("[a-zA-Z]+");
+		this.numWords = words.size();
+
+		for(String token: tokens){
+			if(isWord(token)){
+				this.numSyllables += countSyllables(token);
+			}
+		}
+
 	}
 	
 	
@@ -57,8 +67,7 @@ public class EfficientDocument extends Document {
 	 */
 	@Override
 	public int getNumWords() {
-		//TODO: write this method.  Hint: It's simple
-	    return 0;
+	    return this.numWords;
 	}
 
 	/**
@@ -71,8 +80,7 @@ public class EfficientDocument extends Document {
 	 */
 	@Override
 	public int getNumSentences() {
-        //TODO: write this method.  Hint: It's simple
-        return 0;
+        return this.numSentences;
 	}
 
 	/**
@@ -85,8 +93,7 @@ public class EfficientDocument extends Document {
 	 */
 	@Override
 	public int getNumSyllables() {
-        //TODO: write this method.  Hint: It's simple
-        return 0;
+        return this.numSyllables;
 	}
 	
 	// Can be used for testing
@@ -99,7 +106,7 @@ public class EfficientDocument extends Document {
         testCase(new EfficientDocument(""), 0, 0, 0);
         testCase(new EfficientDocument("sentence, with, lots, of, commas.!  "
                 + "(And some poaren)).  The output is: 7.5."), 15, 11, 4);
-        testCase(new EfficientDocument("many???  Senteeeeeeeeeences are"), 6, 3, 2); 
+        testCase(new EfficientDocument("many???  Senteeeeeeeeeences are"), 6, 3, 2);
         testCase(new EfficientDocument("Here is a series of test sentences. Your program should "
 				+ "find 3 sentences, 33 words, and 49 syllables. Not every word will have "
 				+ "the correct amount of syllables (example, for example), "
